@@ -213,6 +213,7 @@ class Paper(Board):
         elif scores[Paper.PLAYER2] >= winning_score and early_exit:
             return Paper.PLAYER2
         elif not self.possible_moves and scores[Paper.PLAYER1] == scores[Paper.PLAYER2]:
-            return random.choice([Paper.PLAYER1, Paper.PLAYER2])
+            return 0
+            # return random.choice([Paper.PLAYER1, Paper.PLAYER2])
         else:
             return None

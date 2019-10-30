@@ -33,6 +33,7 @@ class Network(nn.Module):
         self.out = nn.Linear(in_features=layer2, out_features=1)
 
     def forward(self, t):
+        # TODO: fix so this can take multiple board states 
         t = flatten(t)
         # hidden layer 1
         t = self.activation(self.fc1(t))
@@ -49,10 +50,11 @@ class Network(nn.Module):
 class NNAI(Pencil):
     def __init__(self, name, network=None, n=3, m=3, exploration_turns=0):
         super().__init__(name)
-        # self.network = network if network is not None else Network(n, m)
-        self.network = Network(n, m)
+        self.network = network if network is not None else Network(n, m)
+        # self.network = Network(n, m)
         self.player_id = None  # may not be the correct way to do this
         self.exploration_turns = exploration_turns
+        self.verb = True
         # self.pool = multiprocessing.Pool()
         # investigate overriding __deepcopy__, __getstate__, __setstate__
 
@@ -60,6 +62,9 @@ class NNAI(Pencil):
         next_state = paper.get_draw_state(move)
         # TODO _grid reference?
         next_state = torch.Tensor(next_state._grid)
+        if self.verb:
+            # print("laa    ", next_state.size())
+            pass
         # find best value of all moves from perspective of first player
         canon_val = self.network(next_state).item()
         return paper.turn * canon_val

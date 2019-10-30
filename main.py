@@ -17,7 +17,7 @@ if __name__ == '__main__':
 
     # players = [Brute('Brute0'), Brute('Brute1')]
 
-
+    arena = Arena(players, "testing", (rows, cols))
     r = arena.create_round()
 
     # super rigorous way of testing preformance

@@ -4,6 +4,7 @@ import json
 import os
 import sys
 
+
 class Arena:
 
     BASEDIR = 'saved_games'
@@ -29,8 +30,10 @@ class Arena:
             match['moves'].append(move)
         if game.winner() == Paper.PLAYER1:
             winner, loser = p1, p2
-        else:
+        elif game.winner() == Paper.PLAYER2:
             winner, loser = p2, p1
+        else:
+            raise ValueError("Ties aren't handled yet: arena logic depends on having a winner")
         self.active_players.remove(loser)
         self.inactive_players.append(loser)
         match['winner'] = winner.name
