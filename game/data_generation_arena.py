@@ -97,7 +97,7 @@ if __name__ == '__main__':
 
 if __name__ == '__main__':
     print("this is temp, will need to make trainer")
-    size = 7, 7
+    size = 5, 5
     model = Network(*size)
     player = NNAI("NN", model, *size)
     dataset = DataGenArena(player, "test_data_gen", size, matches=10)
@@ -106,8 +106,8 @@ if __name__ == '__main__':
                               shuffle=True,
                               num_workers=2)
 
-    criterion = torch.nn.BCELoss(size_average=True)
-    optimizer = torch.optim.SGD(model.parameters(), lr=0.1)
+    criterion = torch.nn.SmoothL1Loss()
+    optimizer = torch.optim.SGD(model.parameters(), lr=0.01)
 
     for epoch in range(2):
         for i, data in enumerate(train_loader, 0):
@@ -118,16 +118,25 @@ if __name__ == '__main__':
             inputs, labels = Variable(inputs), Variable(labels)
 
             # Forward pass: Compute predicted y by passing x to the model
-            print(inputs.float().size)
-            print(inputs.float().size())
+            # print(inputs.float().size)
+            # print(inputs.float().size())
 
             y_pred = model(inputs.float())
 
             # Compute and print loss
             loss = criterion(y_pred, labels)
-            print(epoch, i, loss.data[0])
+            print(epoch, i, loss.data.item())
 
             # Zero gradients, perform a backward pass, and update the weights.
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
+    """
+    gen = 0
+    ai_name = 'nnai'
+    file_name = '{0}_gen{1}.pt'.format(ai_name, gen)
+    file_path = os.path.join('player_files', file_name)
+    if not os.path.exists(file_path):
+        os.makedirs(file_path)
+    print(file_path)
+    torch.save(model.state_dict(), file_path)"""

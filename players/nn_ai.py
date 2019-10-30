@@ -26,6 +26,8 @@ class Network(nn.Module):
         super().__init__()
         # n, m = 3, 3
         width, height = 2*n+1, 2*m+1
+        # this could be used to could be used to construct all the layers
+        self.layer_sizes = [width*height, 120, 60, 1]
         layer1, layer2 = 120, 60
         self.activation = F.relu
         self.fc1 = nn.Linear(in_features=width*height, out_features=layer1)
@@ -33,8 +35,7 @@ class Network(nn.Module):
         self.out = nn.Linear(in_features=layer2, out_features=1)
 
     def forward(self, t):
-        # TODO: fix so this can take multiple board states 
-        t = flatten(t)
+        t = t.view(-1, self.layer_sizes[0])
         # hidden layer 1
         t = self.activation(self.fc1(t))
 
@@ -104,7 +105,7 @@ if __name__ == '__main__':
     STATE = match["moves"][TURN]["grid"]
 
     # TODO this is hard coded
-    network = Network(3, 4)
+    network = Network(2, 2)
     print(len(STATE[0]))
     s = torch.tensor(STATE)
     print(s.type())
