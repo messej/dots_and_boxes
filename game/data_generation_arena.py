@@ -8,7 +8,8 @@ import multiprocessing
 import itertools
 import os
 
-from players.nn_ai import NNAI
+from players.nn_ai import NNAI, Network
+
 
 
 class DataGenArena(Dataset):
@@ -73,6 +74,7 @@ class DataGenArena(Dataset):
         return torch.from_numpy(game_states), torch.Tensor(game_results)
 
 
+"""
 if __name__ == '__main__':
     size = 3, 3
     nm = (2 * size[0] + 1) * (2 * size[1] + 1)
@@ -91,4 +93,41 @@ if __name__ == '__main__':
             inputs, labels = Variable(inputs), Variable(labels)
 
             # Run your training process
-            print(epoch, i, "inputs", inputs.data.shape, "labels", labels.data[:3])
+            print(epoch, i, "inputs", inputs.data.shape, "labels", labels.data[:3])"""
+
+if __name__ == '__main__':
+    print("this is temp, will need to make trainer")
+    size = 7, 7
+    model = Network(*size)
+    player = NNAI("NN", model, *size)
+    dataset = DataGenArena(player, "test_data_gen", size, matches=10)
+    train_loader = DataLoader(dataset=dataset,
+                              batch_size=10,
+                              shuffle=True,
+                              num_workers=2)
+
+    criterion = torch.nn.BCELoss(size_average=True)
+    optimizer = torch.optim.SGD(model.parameters(), lr=0.1)
+
+    for epoch in range(2):
+        for i, data in enumerate(train_loader, 0):
+            # get the inputs
+            inputs, labels = data
+
+            # wrap them in Variable
+            inputs, labels = Variable(inputs), Variable(labels)
+
+            # Forward pass: Compute predicted y by passing x to the model
+            print(inputs.float().size)
+            print(inputs.float().size())
+
+            y_pred = model(inputs.float())
+
+            # Compute and print loss
+            loss = criterion(y_pred, labels)
+            print(epoch, i, loss.data[0])
+
+            # Zero gradients, perform a backward pass, and update the weights.
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
