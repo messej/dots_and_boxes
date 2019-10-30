@@ -9,6 +9,9 @@ import itertools
 import os
 
 from players.nn_ai import NNAI, Network
+gen = 0
+ai_name = 'nnai'
+file_name = '{0}_gen{1}.pt'.format(ai_name, gen)
 
 
 
@@ -99,15 +102,17 @@ if __name__ == '__main__':
     print("this is temp, will need to make trainer")
     size = 5, 5
     model = Network(*size)
+    model.load_state_dict(torch.load(file_name))
+    model.eval()
     player = NNAI("NN", model, *size)
-    dataset = DataGenArena(player, "test_data_gen", size, matches=10)
+    dataset = DataGenArena(player, "test_data_gen", size, matches=100)
     train_loader = DataLoader(dataset=dataset,
                               batch_size=10,
                               shuffle=True,
                               num_workers=2)
 
     criterion = torch.nn.SmoothL1Loss()
-    optimizer = torch.optim.SGD(model.parameters(), lr=0.01)
+    optimizer = torch.optim.SGD(model.parameters(), lr=0.00001)
 
     for epoch in range(2):
         for i, data in enumerate(train_loader, 0):
@@ -131,12 +136,14 @@ if __name__ == '__main__':
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
-    """
+
     gen = 0
     ai_name = 'nnai'
     file_name = '{0}_gen{1}.pt'.format(ai_name, gen)
     file_path = os.path.join('player_files', file_name)
     if not os.path.exists(file_path):
         os.makedirs(file_path)
+    file_path = file_name
     print(file_path)
-    torch.save(model.state_dict(), file_path)"""
+    with open(file_path, 'wb+') as model_file:
+        torch.save(model.state_dict(), model_file)

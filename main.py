@@ -5,12 +5,23 @@ import json
 import os
 from game import Arena
 from game import Paper
+from players.nn_ai import Network
+import torch
 
 from timeit import default_timer as Timer
+gen = 0
+ai_name = 'nnai'
+file_name = '{0}_gen{1}.pt'.format(ai_name, gen)
+file_path = os.path.join("game",  file_name)
 
 if __name__ == '__main__':
-    rows = 7
-    cols = 7
+    rows = 5
+    cols = 5
+    size = 5, 5
+    model = Network(*size)
+    model.load_state_dict(torch.load(file_path))
+    model.eval()
+    player = NNAI("NN", model, *size)
     players = [NNAI('NN0', n=rows, m=cols), NNAI('NN1', n=rows, m=cols)]
     players = [GenericAI('1_generic'), NNAI('-1_nn', n=rows, m=cols, exploration_turns=3)]
     # players = players[::-1]
