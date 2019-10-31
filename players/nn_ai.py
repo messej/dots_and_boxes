@@ -49,12 +49,13 @@ class Network(nn.Module):
 
 
 class NNAI(Pencil):
-    def __init__(self, name, network=None, n=3, m=3, exploration_turns=0):
+    def __init__(self, name, network=None, n=3, m=3, exploration_turns=0, explore_chance=0):
         super().__init__(name)
         self.network = network if network is not None else Network(n, m)
         # self.network = Network(n, m)
         self.player_id = None  # may not be the correct way to do this
         self.exploration_turns = exploration_turns
+        self.explore_chance = explore_chance
         self.verb = True
         # self.pool = multiprocessing.Pool()
         # investigate overriding __deepcopy__, __getstate__, __setstate__
@@ -72,6 +73,8 @@ class NNAI(Pencil):
 
     def play(self, paper):
         moves = paper.possible_moves
+        if random.random() < self.explore_chance:
+            return random.choice(moves)
         if self.exploration_turns > 0:
             self.exploration_turns -= 1
             return random.choice(moves)
