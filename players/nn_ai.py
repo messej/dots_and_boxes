@@ -22,6 +22,7 @@ def flatten(t):
 
 # """
 class Network(nn.Module):
+    # TODO: names and representation and file saving
     def __init__(self, n, m):
         super().__init__()
         # n, m = 3, 3
@@ -45,28 +46,48 @@ class Network(nn.Module):
         # output layer
         t = torch.tanh(self.out(t))
         return t
+
+    def load_model(self, path):
+        self.load_state_dict(torch.load(path))
+        self.eval()
+
+    def save_model(self, path):
+        # TODO: may need to deal with directories
+        # preferably not here
+        with open(path, 'wb+') as model_file:
+            torch.save(self.state_dict(), model_file)
+
+
 # """
 
 
 class NNAI(Pencil):
+    # TODO: Parent Class?
     def __init__(self, name, network=None, n=3, m=3, exploration_turns=0, explore_chance=0):
         super().__init__(name)
         self.network = network if network is not None else Network(n, m)
+        self.size = n, m
         # self.network = Network(n, m)
         self.player_id = None  # may not be the correct way to do this
         self.exploration_turns = exploration_turns
         self.explore_chance = explore_chance
-        self.verb = True
+        self.verb = False
         # self.pool = multiprocessing.Pool()
         # investigate overriding __deepcopy__, __getstate__, __setstate__
+
+    def load_model(self, path):
+        self.network.load_model(path)
+
+    def save_model(self, path):
+        self.network.save_model(path)
 
     def _evaluate(self, move, paper):
         next_state = paper.get_draw_state(move)
         # TODO _grid reference?
         next_state = torch.Tensor(next_state._grid)
         if self.verb:
-            # print("laa    ", next_state.size())
-            pass
+            print("laa    ", next_state.size())
+
         # find best value of all moves from perspective of first player
         canon_val = self.network(next_state).item()
         return paper.turn * canon_val
