@@ -63,10 +63,10 @@ class Network(nn.Module):
 
 class NNAI(Pencil):
     # TODO: Parent Class?
-    def __init__(self, name, network=None, n=3, m=3, exploration_turns=0, explore_chance=0):
+    def __init__(self, name, n=3, m=3, network=None, exploration_turns=0, explore_chance=0):
         super().__init__(name)
         self.network = network if network is not None else Network(n, m)
-        self.size = n, m
+        self.shape = n, m
         # self.network = Network(n, m)
         self.player_id = None  # may not be the correct way to do this
         self.exploration_turns = exploration_turns

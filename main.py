@@ -9,21 +9,29 @@ from players.nn_ai import Network
 import torch
 
 from timeit import default_timer as Timer
-gen = 0
+gen = 70
 ai_name = 'nnai'
-file_name = '{0}_gen{1}.pt'.format(ai_name, gen)
+ai_shape = 3, 3
+file_name = f'{ai_name}{ai_shape}_gen{gen}.pt'
 file_path = os.path.join("game",  file_name)
+gen2 = 60
+file_name = f'{ai_name}{ai_shape}_gen{gen2}.pt'
+file_path2 = os.path.join("game",  file_name)
 
 if __name__ == '__main__':
-    rows = 5
-    cols = 5
-    size = 5, 5
+    rows = ai_shape[0]
+    cols = ai_shape[1]
+    size = ai_shape
     model = Network(*size)
     model.load_state_dict(torch.load(file_path))
     model.eval()
-    player = NNAI("NN", model, *size)
+    player = NNAI(f"NN{gen}", *size, model, exploration_turns=1, explore_chance=0)
+    model = Network(*size)
+    model.load_state_dict(torch.load(file_path))
+    model.eval()
+    player2 = NNAI(f"NN{gen2}", *size, model, exploration_turns=1, explore_chance=0)
     players = [NNAI('NN0', n=rows, m=cols), NNAI('NN1', n=rows, m=cols)]
-    players = [GenericAI('1_generic'), NNAI('-1_nn', n=rows, m=cols, exploration_turns=3)]
+    players = [player2, player]
     # players = players[::-1]
 
     # players = [Brute('Brute0'), Brute('Brute1')]

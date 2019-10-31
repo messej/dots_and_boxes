@@ -8,22 +8,21 @@ import multiprocessing
 import itertools
 import os
 
-from players.nn_ai import NNAI, Network
-gen = 0
+
+gen = 1
 ai_name = 'nnai'
 file_name = '{0}_gen{1}.pt'.format(ai_name, gen)
-
 
 
 class DataGenArena(Dataset):
     BASEDIR = 'player_files'
 
-    def __init__(self, player, arena_name, size=(7, 7), matches=100, data=None):
+    def __init__(self, player, matches=100, arena_name='data_gen', data=None):
         self.player = player
         self.arena_name = arena_name
-        self.rows = size[0]
-        self.cols = size[1]
-        self.grid_size = (2*size[0]+1) * (2*size[1]+1)
+        self.rows = player.shape[0]
+        self.cols = player.shape[1]
+        self.grid_shape = (2*player.shape[0]+1) * (2*player.shape[1]+1)
         self.round_num = 0
         self.max_game_len = 2*self.rows*self.cols + self.rows + self.cols
         self.shuffle = True  # might not be the best way or necc
@@ -73,16 +72,17 @@ class DataGenArena(Dataset):
         game_states, game_results = zip(*result)
         game_states, game_results = np.concatenate(game_states), list(itertools.chain(*game_results))
 
-        game_states = np.reshape(game_states, (len(game_states), self.grid_size))
+        # TODO: see if I can implement this with view just for fun
+        game_states = np.reshape(game_states, (len(game_states), self.grid_shape))
         return torch.from_numpy(game_states), torch.Tensor(game_results)
 
 
-"""
 if __name__ == '__main__':
+    from players.nn_ai import NNAI
     size = 3, 3
     nm = (2 * size[0] + 1) * (2 * size[1] + 1)
     player = NNAI("NN", None, size[0], size[1], 3)
-    dataset = DataGenArena(player, "test_data_gen", size, 100)
+    dataset = DataGenArena(player, 100)
     train_loader = DataLoader(dataset=dataset,
                               batch_size=100,
                               shuffle=True,
@@ -96,25 +96,26 @@ if __name__ == '__main__':
             inputs, labels = Variable(inputs), Variable(labels)
 
             # Run your training process
-            print(epoch, i, "inputs", inputs.data.shape, "labels", labels.data[:3])"""
+            print(epoch, i, "inputs", inputs.data.shape, "labels", labels.data[:3])
 
+"""
 if __name__ == '__main__':
     print("this is temp, will need to make trainer")
     size = 5, 5
     model = Network(*size)
-    model.load_state_dict(torch.load(file_name))
-    model.eval()
+    # model.load_state_dict(torch.load(file_name))
+    # model.eval()
     player = NNAI("NN", model, *size)
-    dataset = DataGenArena(player, "test_data_gen", size, matches=100)
+    dataset = DataGenArena(player, matches=500)
     train_loader = DataLoader(dataset=dataset,
-                              batch_size=10,
+                              batch_size=20,
                               shuffle=True,
                               num_workers=2)
 
     criterion = torch.nn.SmoothL1Loss()
-    optimizer = torch.optim.SGD(model.parameters(), lr=0.00001)
+    optimizer = torch.optim.SGD(model.parameters(), lr=0.001)
 
-    for epoch in range(2):
+    for epoch in range(15):
         for i, data in enumerate(train_loader, 0):
             # get the inputs
             inputs, labels = data
@@ -137,7 +138,7 @@ if __name__ == '__main__':
             loss.backward()
             optimizer.step()
 
-    gen = 0
+    gen = 1
     ai_name = 'nnai'
     file_name = '{0}_gen{1}.pt'.format(ai_name, gen)
     file_path = os.path.join('player_files', file_name)
@@ -146,4 +147,4 @@ if __name__ == '__main__':
     file_path = file_name
     print(file_path)
     with open(file_path, 'wb+') as model_file:
-        torch.save(model.state_dict(), model_file)
+        torch.save(model.state_dict(), model_file)"""
