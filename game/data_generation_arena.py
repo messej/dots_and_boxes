@@ -8,10 +8,19 @@ import multiprocessing
 import itertools
 import os
 
+try:
+    import psutil
+except ImportError:
+    IMPORT_FAILED = True
+else:
+    IMPORT_FAILED = False
 
-gen = 1
-ai_name = 'nnai'
-file_name = '{0}_gen{1}.pt'.format(ai_name, gen)
+
+def limit_cpu():
+    """is called at every process start"""
+    p = psutil.Process(os.getpid())
+    # set to lowest priority, this is windows only, on Unix use ps.nice(19)
+    p.nice(psutil.BELOW_NORMAL_PRIORITY_CLASS)
 
 
 class DataGenArena(Dataset):
@@ -64,7 +73,10 @@ class DataGenArena(Dataset):
         return game_states, game_results
 
     def play_matches(self, matches=100):
-        pool = multiprocessing.Pool()
+        if IMPORT_FAILED:
+            pool = multiprocessing.Pool(processes=(multiprocessing.cpu_count() - 1))
+        else:
+            pool = multiprocessing.Pool(initializer=limit_cpu, processes=(multiprocessing.cpu_count() - 1))
         result = pool.map(self.play_match, range(matches))
         pool.close()
         pool.join()
@@ -79,9 +91,9 @@ class DataGenArena(Dataset):
 
 if __name__ == '__main__':
     from players.nn_ai import NNAI
-    size = 3, 3
+    size = 7, 7
     nm = (2 * size[0] + 1) * (2 * size[1] + 1)
-    player = NNAI("NN", None, size[0], size[1], 3)
+    player = NNAI("NN", size[0], size[1], exploration_turns=3)
     dataset = DataGenArena(player, 100)
     train_loader = DataLoader(dataset=dataset,
                               batch_size=100,

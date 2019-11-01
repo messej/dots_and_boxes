@@ -26,6 +26,7 @@ class AITrainer:
         # TODO: fix use of preexisting model
         self.model_path = model_name
         if self.model_path is not None:
+            print("Hi")
             self.player.load_model(self.model_path)
             # TODO: figure out how to get gen from somewhere
             self.gen = gen
@@ -40,6 +41,7 @@ class AITrainer:
         self.generations()
 
     def generation(self):
+        print(self.gen)
         path = self.full_path()
         self.player.load_model(path)
         model = self.player.network
@@ -92,5 +94,8 @@ class AITrainer:
 
 if __name__ == '__main__':
     from players.nn_ai import NNAI
-    ai = NNAI("nnai", 7, 7, exploration_turns=5, explore_chance=0.15)
-    trainer = AITrainer(ai)
+    shape = 7, 7
+    gen = 4
+    ai = NNAI("nnai", *shape, exploration_turns=5, explore_chance=0.15)
+    file_name = f'{ai.name}{ai.shape}_gen{gen}.pt'
+    trainer = AITrainer(ai, model_name=file_name, gen=gen)
